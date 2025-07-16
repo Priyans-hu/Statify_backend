@@ -1,0 +1,43 @@
+# Ignore Python virtual environments
+venv/
+.env/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.sqlite3
+
+# IDE/editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS and system files
+.DS_Store
+Thumbs.db
+
+# Git files
+.git/
+.gitignore
+
+# Bytecode or logs
+*.log
+*.bak
+
+# Ignore test outputs or coverage
+htmlcov/
+.coverage
+coverage.xml
+*.egg-info/
+dist/
+build/
+
+# Docker-related
+Dockerfile*
+docker-compose*.yml
+*.tar
