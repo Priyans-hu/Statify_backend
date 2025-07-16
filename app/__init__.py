@@ -20,7 +20,7 @@ def create_app():
     bcrypt.init_app(app)
 
     with app.app_context():
-
+    
         from app import models
 
         # from app.routes import register_routes
