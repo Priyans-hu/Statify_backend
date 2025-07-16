@@ -4,10 +4,10 @@ import os
 
 
 def create_app():
-    from app.routes import user  # import router
+    # from app.routes import user  # import router
     load_dotenv()
     app = FastAPI()
     
-    app.include_router(user.router)
+    # app.include_router(user.router)
 
     return app
