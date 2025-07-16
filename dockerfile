@@ -8,11 +8,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
+# Copy the entire app
 COPY . .
 
-# Expose port
-EXPOSE 5000
+# Expose the port FastAPI will run on
+EXPOSE 8000
 
-# Run the Flask app
-CMD ["flask", "--app", "app", "run", "--host=0.0.0.0"]
+# Run the FastAPI app using Uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
