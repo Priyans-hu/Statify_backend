@@ -1,6 +1,7 @@
-Flask
-Flask-SQLAlchemy
-Flask-Migrate
-python-dotenv
+fastapi
+uvicorn[standard]
+sqlalchemy
+alembic
 psycopg2-binary
-flask_bcrypt
+bcrypt
+python-dotenv
