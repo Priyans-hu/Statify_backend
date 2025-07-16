@@ -15,15 +15,15 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(os.getenv('FLASK_CONFIG', 'app.config.DevelopmentConfig'))
 
-    # db.init_app(app)
-    # migrate.init_app(app, db)
-    # bcrypt.init_app(app)
+    db.init_app(app)
+    migrate.init_app(app, db)
+    bcrypt.init_app(app)
 
-    # with app.app_context():
-    
-    #     from app import models
+    with app.app_context():
 
-    #     from app.routes import register_routes
-    #     register_routes(app)
+        from app import models
+
+        # from app.routes import register_routes
+        # register_routes(app)
 
     return app
