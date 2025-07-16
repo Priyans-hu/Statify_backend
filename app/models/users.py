@@ -2,7 +2,7 @@
 
 from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, text
 import uuid
 
 from app.database import Base
@@ -10,7 +10,7 @@ from app.database import Base
 class Users(Base):
     __tablename__ = 'users'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True,  server_default=text("gen_random_uuid()"), unique=True, nullable=False)
     username = Column(String(80), nullable=False)
     org_id = Column(Integer, nullable=False)
     role = Column(String(32), nullable=False)
