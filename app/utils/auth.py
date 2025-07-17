@@ -15,7 +15,7 @@ def encode_auth_token(user_id: str) -> str:
     try:
         payload = {
             'user_id': str(user_id),
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)
+            'exp': datetime.datetime.now() + datetime.timedelta(days=1)
         }
         return jwt.encode(payload, SECRET_KEY, algorithm='HS256')
     except Exception as e:
