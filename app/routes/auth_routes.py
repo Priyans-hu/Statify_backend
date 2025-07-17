@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from app.controllers.auth_controller import register_user, login_user, logout_user
+from app.controllers.auth_controller import register_user, login_user, logout_user, current_user_controller
 from app.utils.auth_util import get_current_user
 from app.models.users import Users
 
@@ -16,3 +16,7 @@ def login(data: dict):
 @router.post("/logout")
 def logout(current_user: Users = Depends(get_current_user)):
     return logout_user(current_user)
+
+@router.get("/current_user")
+def current_user(current_user: Users = Depends(get_current_user)):
+    return current_user_controller(current_user)

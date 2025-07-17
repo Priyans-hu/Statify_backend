@@ -3,7 +3,7 @@ from app.models.users import Users
 from app.database import get_db
 from app.utils.auth_util import encode_auth_token
 from sqlalchemy.orm import Session
-from passlib.hash import bcrypt
+from app.utils.password import hash_password, verify_password
 from contextlib import contextmanager
 
 @contextmanager
@@ -26,8 +26,8 @@ def register_user_service(data: dict):
         if existing:
             raise HTTPException(status_code=400, detail="User already exists")
 
-        user = Users(username=username, email=email, org_id=org_id, role=role)
-        user.set_password(password)
+        hashedPassword = hash_password(password)
+        user = Users(username=username, email=email, org_id=org_id, role=role, password_hash=hashedPassword)
         db.add(user)
         db.commit()
         db.refresh(user)
@@ -39,7 +39,7 @@ def login_user_service(data: dict):
 
     with db_session() as db:
         user = db.query(Users).filter_by(username=username).first()
-        if not user or not user.check_password(password):
+        if not user or not verify_password(user.password, password):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
         token = encode_auth_token(user.id)
