@@ -1,7 +1,6 @@
-from app import create_app
-import uvicorn
+from fastapi import FastAPI
+from app.routes import auth_routes
 
-app = create_app()
+app = FastAPI()
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+app.include_router(auth_routes.router)
