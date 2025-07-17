@@ -40,7 +40,7 @@ def login_user_service(data: dict):
 
     with db_session() as db:
         user = db.query(Users).filter_by(username=username).first()
-        if not user or not verify_password(user.password, password):
+        if not user or not verify_password(password, user.password_hash):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
         token = encode_auth_token(user.id)
