@@ -5,6 +5,7 @@ from app.utils.auth_util import encode_auth_token
 from sqlalchemy.orm import Session
 from app.utils.password import hash_password, verify_password
 from contextlib import contextmanager
+import uuid
 
 @contextmanager
 def db_session():
@@ -27,7 +28,7 @@ def register_user_service(data: dict):
             raise HTTPException(status_code=400, detail="User already exists")
 
         hashedPassword = hash_password(password)
-        user = Users(username=username, email=email, org_id=org_id, role=role, password_hash=hashedPassword)
+        user = Users(id = uuid.uuid4(), username=username, email=email, org_id=org_id, role=role, password_hash=hashedPassword)
         db.add(user)
         db.commit()
         db.refresh(user)
