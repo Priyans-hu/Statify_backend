@@ -1,11 +1,14 @@
-from pydantic import BaseModel
-from typing import Optional, Dict
 from datetime import datetime
+from typing import Dict, Optional
+
+from pydantic import BaseModel
+
 
 class LogCreate(BaseModel):
     service_id: int
     status_code: int
     details: Optional[Dict] = None
+
 
 class LogResponse(BaseModel):
     id: int

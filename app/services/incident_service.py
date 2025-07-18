@@ -1,8 +1,14 @@
 # app/services/incident_service.py
-from sqlalchemy.orm import Session
-from app.models import Incidents, IncidentServiceAssociation, IncidentUpdates
-from app.schemas.incident_schema import IncidentCreate, IncidentUpdate, IncidentUpdateEntry
 from datetime import datetime
+
+from sqlalchemy.orm import Session
+
+from app.models import Incidents, IncidentServiceAssociation, IncidentUpdates
+from app.schemas.incident_schema import (
+    IncidentCreate,
+    IncidentUpdate,
+    IncidentUpdateEntry,
+)
 
 
 def create_incident(db: Session, org_id: int, data: IncidentCreate):
@@ -11,7 +17,7 @@ def create_incident(db: Session, org_id: int, data: IncidentCreate):
         org_id=org_id,
         status=data.status,
         is_scheduled=data.is_scheduled,
-        started_at=data.started_at or datetime.utcnow(),
+        started_at=data.started_at or datetime.now(),
     )
 
     db.add(incident)
@@ -44,7 +50,7 @@ def add_update_to_incident(db: Session, data: IncidentUpdateEntry):
     update = IncidentUpdates(
         incident_id=data.incident_id,
         description=data.description,
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(),
     )
     db.add(update)
 

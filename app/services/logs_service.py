@@ -1,9 +1,10 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
+
 from app.models.logs import Logs
-from app.schemas.logs_schema import LogCreate
 from app.models.services import Services
 from app.models.users import Users
-from fastapi import HTTPException
+from app.schemas.logs_schema import LogCreate
 
 
 def create_log_entry(db: Session, user: Users, log_data: LogCreate):
@@ -15,7 +16,7 @@ def create_log_entry(db: Session, user: Users, log_data: LogCreate):
         org_id=user.org_id,
         service_id=log_data.service_id,
         status_code=log_data.status_code,
-        details=log_data.details
+        details=log_data.details,
     )
     db.add(log)
     db.commit()

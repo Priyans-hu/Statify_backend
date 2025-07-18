@@ -1,6 +1,8 @@
-from pydantic import BaseModel
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
+
+from pydantic import BaseModel
+
 
 class IncidentCreate(BaseModel):
     title: str
@@ -9,13 +11,16 @@ class IncidentCreate(BaseModel):
     service_ids: List[int]
     started_at: Optional[datetime] = None
 
+
 class IncidentUpdate(BaseModel):
     status: str
     resolved_at: Optional[datetime] = None
 
+
 class IncidentUpdateEntry(BaseModel):
     incident_id: int
     description: str
+
 
 class IncidentOut(BaseModel):
     id: int
