@@ -9,52 +9,56 @@ from datetime import datetime
 from app.services.auth_service import db_session
 
 
-def create_incident(db: Session, org_id: int, data: IncidentCreate):
-    if not org_id:
+def create_incident(current_user, data: IncidentCreate):
+    if not current_user.org_id:
         raise HTTPException(status_code=400, detail="Organization ID is required")
     incident = Incidents(
         title=data.title,
-        org_id=org_id,
+        org_id=current_user.org_id,
         status=data.status,
         is_scheduled=data.is_scheduled,
-        started_at=data.started_at or datetime.utcnow(),
+        started_at=data.started_at or datetime.now(),
     )
 
-    db.add(incident)
-    db.commit()
-    db.refresh(incident)
+    with db_session() as db:
+        db.add(incident)
+        db.commit()
+        db.refresh(incident)
 
-    for sid in data.service_ids:
-        assoc = IncidentServiceAssociation(incident_id=incident.id, service_id=sid)
-        db.add(assoc)
+        for sid in data.service_ids:
+            assoc = IncidentServiceAssociation(incident_id=incident.id, service_id=sid)
+            db.add(assoc)
 
-    db.commit()
+        db.commit()
+
     return incident
 
 
-def update_incident_status(db: Session, incident_id: int, data: IncidentUpdate):
-    incident = db.query(Incidents).filter_by(id=incident_id).first()
+def update_incident_status(incident_id: int, data: IncidentUpdate):
+    with db_session() as db:
+        incident = db.query(Incidents).filter_by(id=incident_id).first()
 
-    if not incident:
-        return None
-    incident.status = data.status
+        if not incident:
+            return None
+        incident.status = data.status
 
-    if data.resolved_at:
-        incident.resolved_at = data.resolved_at
+        if data.resolved_at:
+            incident.resolved_at = data.resolved_at
 
-    db.commit()
+        db.commit()
     return incident
 
 
 def add_update_to_incident(db: Session, data: IncidentUpdateEntry):
-    update = IncidentUpdates(
-        incident_id=data.incident_id,
-        description=data.description,
-        timestamp=datetime.now(),
-    )
-    db.add(update)
+    with db_session() as db:
+        update = IncidentUpdates(
+            incident_id=data.incident_id,
+            description=data.description,
+            timestamp=datetime.now(),
+        )
+        db.add(update)
 
-    db.commit()
+        db.commit()
     return update
 
 

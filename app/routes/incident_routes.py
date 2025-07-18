@@ -9,18 +9,18 @@ router = APIRouter(prefix="/incidents", tags=["Incidents"])
 
 
 @router.post("/")
-def create_incident(data: IncidentCreate):
-    return incident_controller.create_incident_controller(data)
+def create_incident(data: IncidentCreate, current_user: Users = Depends(get_current_user)):
+    return incident_controller.create_incident_controller(data, current_user)
 
 
 @router.patch("/{incident_id}")
-def update_incident(incident_id: int, data: IncidentUpdate):
-    return incident_controller.update_incident_controller(incident_id, data)
+def update_incident(incident_id: int, data: IncidentUpdate, current_user: Users = Depends(get_current_user)):
+    return incident_controller.update_incident_controller(incident_id, data, current_user)
 
 
 @router.post("/updates/")
-def add_incident_update(data: IncidentUpdateEntry):
-    return incident_controller.add_incident_update_controller(data)
+def add_incident_update(data: IncidentUpdateEntry, current_user: Users = Depends(get_current_user)):
+    return incident_controller.add_incident_update_controller(data, current_user)
 
 
 @router.get("/")
