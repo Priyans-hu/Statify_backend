@@ -1,12 +1,7 @@
 # app/controllers/incident_controller.py
 from fastapi import Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.database import get_db
-from app.services.auth_service import db_session
-from app.utils.auth_util import get_current_user
 from app.schemas.incident_schema import *
 from app.services import incident_service
-from app.models.users import Users
 
 def create_incident_controller(
     data: dict,
