@@ -11,6 +11,12 @@ router = APIRouter()
 
 @router.post("/logs", response_model=LogResponse)
 def create_log(
-    log_data: LogCreate, db: Session = Depends(get_db), user=Depends(get_current_user)
+    log_data: LogCreate, current_user = Depends(get_current_user)
 ):
-    return create_log_entry(db, user, log_data)
+    try:
+        return {
+            "message": "Fetched all incidents successfully",
+            "data": create_log_entry(current_user, log_data)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
