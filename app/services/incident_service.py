@@ -6,6 +6,8 @@ from app.models.users import Users
 from app.schemas.incident_schema import IncidentCreate, IncidentUpdate, IncidentUpdateEntry
 from datetime import datetime
 
+from app.services.auth_service import db_session
+
 
 def create_incident(db: Session, org_id: int, data: IncidentCreate):
     if not org_id:
@@ -48,7 +50,7 @@ def add_update_to_incident(db: Session, data: IncidentUpdateEntry):
     update = IncidentUpdates(
         incident_id=data.incident_id,
         description=data.description,
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(),
     )
     db.add(update)
 
@@ -56,8 +58,10 @@ def add_update_to_incident(db: Session, data: IncidentUpdateEntry):
     return update
 
 
-def get_incidents_by_org(db: Session, user: Users):
+def get_incidents_by_org(user):
     if not user.org_id:
         raise HTTPException(status_code=400, detail="Organization ID is required")
-    
-    return db.query(Incidents).filter_by(org_id=user.org_id).all()
+    with db_session() as db:
+        result = db.query(Incidents).filter_by(org_id=user.org_id).all()
+        print(result)
+        return result if result else {"message": "No incidents found for this organization."}

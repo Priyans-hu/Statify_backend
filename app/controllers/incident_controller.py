@@ -24,13 +24,12 @@ def add_incident_update_controller(data: IncidentUpdateEntry, db: Session = Depe
     return incident_service.add_update_to_incident(db, data)
 
 def get_all_incidents_controller(
-    db: Session = Depends(get_db),
-    user: Users = Depends(get_current_user)
+    current_user
 ):
     try:
         return {
             "message": "Fetched all incidents successfully",
-            "data": incident_service.get_incidents_by_org(db, user)
+            "data": incident_service.get_incidents_by_org(current_user)
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while fetching incidents: {str(e)}")
