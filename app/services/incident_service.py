@@ -49,7 +49,7 @@ def update_incident_status(incident_id: int, data: IncidentUpdate):
     return incident
 
 
-def add_update_to_incident(db: Session, data: IncidentUpdateEntry):
+def add_update_to_incident(data: IncidentUpdateEntry):
     with db_session() as db:
         update = IncidentUpdates(
             incident_id=data.incident_id,

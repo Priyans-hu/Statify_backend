@@ -23,8 +23,8 @@ def create_incident_controller(
 def update_incident_controller(incident_id: int, data: IncidentUpdate, current_user):
     return incident_service.update_incident_status(incident_id, data)
 
-def add_incident_update_controller(data: IncidentUpdateEntry, db: Session = Depends(get_db), current_user: Users = Depends(get_current_user)):
-    return incident_service.add_update_to_incident(db, data)
+def add_incident_update_controller(data: IncidentUpdateEntry, current_user):
+    return incident_service.add_update_to_incident(data)
 
 def get_all_incidents_controller(
     current_user
