@@ -1,22 +1,46 @@
 from fastapi import APIRouter, Depends
-from app.schemas.service_schema import ServiceCreate, ServiceOut
+from sqlalchemy.orm import Session
+
 from app.controllers import service_controller
-from typing import List
+from app.schemas.service_schema import ServiceCreate, ServiceStatusUpdate, ServiceOut
+from app.database import get_db
+from app.utils.auth_util import get_current_user
+from app.models.users import Users
 
 router = APIRouter(prefix="/services", tags=["Services"])
 
+
 @router.post("/", response_model=ServiceOut)
-def create_service(data: ServiceCreate):
-    return service_controller.create_service_controller(data)
+def create_service(
+    service_data: ServiceCreate,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    return service_controller.create_service_controller(service_data, db, current_user)
 
-@router.delete("/{service_id}")
-def delete_service(service_id: int):
-    return service_controller.delete_service_controller(service_id)
 
-@router.put("/{service_id}/status")
-def update_service_status(service_id: int, new_status_code: int):
-    return service_controller.update_service_status_controller(service_id, new_status_code)
+@router.delete("/{service_id}", status_code=204)
+def delete_service(
+    service_id: int,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    return service_controller.delete_service_controller(service_id, db, current_user)
 
-@router.get("/", response_model=List[ServiceOut])
-def list_services():
-    return service_controller.get_services_controller()
+
+@router.patch("/{service_id}/status", response_model=ServiceOut)
+def update_service_status(
+    service_id: int,
+    status_update: ServiceStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    return service_controller.update_service_status_controller(service_id, status_update, db, current_user)
+
+
+@router.get("/", response_model=list[ServiceOut])
+def get_services(
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    return service_controller.get_services_controller(db, current_user)
