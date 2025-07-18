@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from dotenv import load_dotenv
-from app.routes import auth_routes, logs_route, service_routes, ws_routes
+from app.routes import auth_routes, logs_route, service_routes, ws_routes, incident_routes
 import os
 
 
@@ -13,5 +13,6 @@ def create_app():
     app.include_router(logs_route.router)
     app.include_router(service_routes.router)
     app.include_router(ws_routes.router)
+    app.include_router(incident_routes.router)
 
     return app
