@@ -1,5 +1,5 @@
 # app/controllers/incident_controller.py
-from fastapi import Depends, HTTPException
+from fastapi import HTTPException
 from app.schemas.incident_schema import *
 from app.services import incident_service
 
