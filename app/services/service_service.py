@@ -1,10 +1,12 @@
 from sqlalchemy.orm import Session
 
+import asyncio
 from app.models.services import Services
 from app.models.users import Users
 from app.schemas.service_schema import ServiceCreate
 from app.schemas.logs_schema import LogCreate
 from app.services.logs_service import create_log_entry
+from app.utils.websocket_manager import ws_manager
 
 
 def create_service_entry(
@@ -27,6 +29,16 @@ def create_service_entry(
         status_code=service_data.status_code,
         details={"action": "create", "domain": service_data.domain}
     ))
+
+    asyncio.create_task(ws_manager.broadcast({
+        "action": "create",
+        "service": {
+            "id": new_service.id,
+            "name": new_service.service_name,
+            "status_code": new_service.status_code,
+            "domain": new_service.domain
+        }
+    }))
 
     return new_service
 
@@ -51,6 +63,15 @@ def delete_service_entry(
             status_code=service.status_code,
             details={"action": "delete"}
         ))
+
+        asyncio.create_task(ws_manager.broadcast({
+        "action": "delete",
+        "service": {
+            "id": service.id,
+            "status_code": service.status_code,
+            "domain": service.domain
+            }
+        }))
 
         return service
     return None
@@ -77,6 +98,16 @@ def update_service_status_entry(
             status_code=new_status_code,
             details={"action": "update_status"}
         ))
+
+        asyncio.create_task(ws_manager.broadcast({
+            "action": "create",
+            "service": {
+                "id": service.id,
+                "name": service.service_name,
+                "status_code": service.status_code,
+                "domain": service.domain
+            }
+        }))
 
         return service
     return None
