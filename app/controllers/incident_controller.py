@@ -21,10 +21,22 @@ def create_incident_controller(
         raise HTTPException(status_code=500, detail=str(e))
 
 def update_incident_controller(incident_id: int, data: IncidentUpdate, current_user):
-    return incident_service.update_incident_status(incident_id, data)
+    try:
+        return {
+            "message": "Fetched all incidents successfully",
+            "data": incident_service.update_incident_status(incident_id, data)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 def add_incident_update_controller(data: IncidentUpdateEntry, current_user):
-    return incident_service.add_update_to_incident(data)
+    try:
+        return {
+            "message": "Fetched all incidents successfully",
+            "data": incident_service.add_update_to_incident(data)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 def get_all_incidents_controller(
     current_user
