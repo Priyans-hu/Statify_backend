@@ -1,23 +1,21 @@
 # app/services/incident_service.py
-from datetime import datetime
-
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
-
 from app.models import Incidents, IncidentServiceAssociation, IncidentUpdates
-from app.schemas.incident_schema import (
-    IncidentCreate,
-    IncidentUpdate,
-    IncidentUpdateEntry,
-)
+from app.models.users import Users
+from app.schemas.incident_schema import IncidentCreate, IncidentUpdate, IncidentUpdateEntry
+from datetime import datetime
 
 
 def create_incident(db: Session, org_id: int, data: IncidentCreate):
+    if not org_id:
+        raise HTTPException(status_code=400, detail="Organization ID is required")
     incident = Incidents(
         title=data.title,
         org_id=org_id,
         status=data.status,
         is_scheduled=data.is_scheduled,
-        started_at=data.started_at or datetime.now(),
+        started_at=data.started_at or datetime.utcnow(),
     )
 
     db.add(incident)
@@ -50,7 +48,7 @@ def add_update_to_incident(db: Session, data: IncidentUpdateEntry):
     update = IncidentUpdates(
         incident_id=data.incident_id,
         description=data.description,
-        timestamp=datetime.now(),
+        timestamp=datetime.utcnow(),
     )
     db.add(update)
 
@@ -58,5 +56,8 @@ def add_update_to_incident(db: Session, data: IncidentUpdateEntry):
     return update
 
 
-def get_incidents_by_org(db: Session, org_id: int):
-    return db.query(Incidents).filter_by(org_id=org_id).all()
+def get_incidents_by_org(db: Session, user: Users):
+    if not user.org_id:
+        raise HTTPException(status_code=400, detail="Organization ID is required")
+    
+    return db.query(Incidents).filter_by(org_id=user.org_id).all()
