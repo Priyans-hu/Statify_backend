@@ -1,10 +1,16 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 
+
 class ServiceCreate(BaseModel):
     service_name: str
     status_code: int
     domain: Optional[str] = None
+
+
+class ServiceStatusUpdate(BaseModel):
+    status_code: int = Field(..., description="New status code for the service")
+
 
 class ServiceOut(BaseModel):
     id: int
