@@ -1,6 +1,8 @@
-Flask
-Flask-SQLAlchemy
-Flask-Migrate
-python-dotenv
+fastapi[all]
+uvicorn[standard]
+SQLAlchemy>=2.0
+alembic
 psycopg2-binary
-flask_bcrypt
+passlib[bcrypt]
+python-dotenv
+PyJWT
