@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.middleware.org_slug_middleware import OrgSlugResolverMiddleware
 from app.routes import (
     auth_routes,
     incident_routes,
@@ -24,6 +25,8 @@ def create_app():
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    app.add_middleware(OrgSlugResolverMiddleware)
 
     app.include_router(auth_routes.router)
     app.include_router(logs_route.router)
