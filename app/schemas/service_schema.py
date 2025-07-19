@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
 from typing import Optional
+
+from pydantic import BaseModel, Field
 
 
 class ServiceCreate(BaseModel):
@@ -20,4 +21,4 @@ class ServiceOut(BaseModel):
     domain: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True

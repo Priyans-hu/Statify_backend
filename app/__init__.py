@@ -1,17 +1,38 @@
-from fastapi import FastAPI
 from dotenv import load_dotenv
-from app.routes import auth_routes, logs_route, service_routes, ws_routes
-import os
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.middleware.org_slug_middleware import OrgSlugResolverMiddleware
+from app.routes import (
+    auth_routes,
+    incident_routes,
+    logs_route,
+    service_routes,
+    status_routes,
+    ws_routes,
+)
 
 
 def create_app():
     # from app.routes import user  # import router
     load_dotenv()
     app = FastAPI()
+    # Corss Middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    app.add_middleware(OrgSlugResolverMiddleware)
 
     app.include_router(auth_routes.router)
     app.include_router(logs_route.router)
     app.include_router(service_routes.router)
     app.include_router(ws_routes.router)
+    app.include_router(incident_routes.router)
+    app.include_router(status_routes.router)
 
     return app
