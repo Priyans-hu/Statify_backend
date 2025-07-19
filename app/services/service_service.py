@@ -79,16 +79,13 @@ def delete_service_entry(service_id: int, user: Users):
                     ),
                 )
 
-        publish_ws_event(
-            {
-                "action": "delete",
-                "service": {
+                event_data = {
                     "id": service.id,
                     "status_code": service.status_code,
                     "domain": service.domain,
-                },
-            }
-        )
+                }
+
+        publish_ws_event({"action": "delete", "service": event_data})
 
         return service
 
@@ -122,17 +119,14 @@ def update_service_status_entry(service_id: int, new_status_code: int, user: Use
                     ),
                 )
 
-        publish_ws_event(
-            {
-                "action": "update",
-                "service": {
-                    "id": service.id,
+                event_data = {
+                    "id": str(service.id),
                     "name": service.service_name,
                     "status_code": service.status_code,
                     "domain": service.domain,
-                },
-            }
-        )
+                }
+
+        publish_ws_event({"action": "update", "service": event_data})
 
         return service
 

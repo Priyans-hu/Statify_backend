@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
+
 from app.controllers import service_controller
 from app.models.users import Users
 from app.schemas.service_schema import ServiceCreate, ServiceOut, ServiceStatusUpdate
@@ -35,7 +36,6 @@ def update_service_status(
 
 
 @router.get("/", response_model=list[ServiceOut])
-def get_services(
-    current_user: Users = Depends(get_current_user)
-):
-    return service_controller.get_services_controller(current_user)
+def get_services(request: Request):
+    org_id = request.state.org_id
+    return service_controller.get_services_controller(org_id)

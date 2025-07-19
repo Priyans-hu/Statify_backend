@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from app.schemas.service_schema import ServiceCreate, ServiceStatusUpdate
+
+from app.schemas.service_schema import ServiceCreate, ServiceOut, ServiceStatusUpdate
 from app.services import service_service
 
 router = APIRouter(prefix="/services", tags=["Services"])
@@ -40,10 +41,8 @@ def update_service_status_controller(
     )
     if not updated:
         raise HTTPException(status_code=404, detail="Service not found or not allowed")
-    return updated
+    return ServiceOut.from_orm(updated)
 
 
-def get_services_controller(
-    current_user
-):
-    return service_service.get_services_by_org(current_user.org_id)
+def get_services_controller(org_id):
+    return service_service.get_services_by_org(org_id)
