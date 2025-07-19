@@ -7,6 +7,7 @@ from app.routes import (
     incident_routes,
     logs_route,
     service_routes,
+    status_routes,
     ws_routes,
 )
 
@@ -18,7 +19,7 @@ def create_app():
     # Corss Middleware
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"], 
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -29,5 +30,6 @@ def create_app():
     app.include_router(service_routes.router)
     app.include_router(ws_routes.router)
     app.include_router(incident_routes.router)
+    app.include_router(status_routes.router)
 
     return app
