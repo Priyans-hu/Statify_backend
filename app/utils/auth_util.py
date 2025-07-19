@@ -14,10 +14,13 @@ SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 security = HTTPBearer()
 
 
-def encode_auth_token(user_id: str) -> str:
+def encode_auth_token(user: Users) -> str:
     try:
         payload = {
-            "user_id": str(user_id),
+            "user_id": str(user.id),
+            "role": str(user.role),
+            "org_id": str(user.org_id),
+            "username": str(user.username),
             "exp": datetime.datetime.now() + datetime.timedelta(days=1),
         }
         return jwt.encode(payload, SECRET_KEY, algorithm="HS256")

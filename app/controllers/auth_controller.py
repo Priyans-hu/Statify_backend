@@ -16,9 +16,9 @@ def register_user(data: dict):
         )
 
 
-def login_user(data: dict):
+def login_user(data: dict, org_id: int):
     try:
-        result = login_user_service(data)
+        result = login_user_service(data, org_id)
         return {"message": "Login successful.", "data": result}
     except HTTPException as e:
         raise e

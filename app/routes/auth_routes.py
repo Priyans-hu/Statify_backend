@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 
 from app.controllers.auth_controller import (
     current_user_controller,
@@ -13,13 +13,23 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.post("/register")
-def register(data: dict):
-    return register_user(data)
+def register(
+    data: dict,
+    request: Request,
+):
+    org_id = request.state.org_id
+    return register_user(
+        data,
+    )
 
 
 @router.post("/login")
-def login(data: dict):
-    return login_user(data)
+def login(
+    data: dict,
+    request: Request,
+):
+    org_id = request.state.org_id
+    return login_user(data, org_id)
 
 
 @router.post("/logout")

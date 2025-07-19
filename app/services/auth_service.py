@@ -49,7 +49,7 @@ def register_user_service(data: dict):
         return {"message": "User registered successfully", "user_id": str(user.id)}
 
 
-def login_user_service(data: dict):
+def login_user_service(data: dict, org_id: int):
     username = data.get("username")
     password = data.get("password")
 
@@ -61,5 +61,10 @@ def login_user_service(data: dict):
         if not user or not verify_password(password, user.password_hash):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        token = encode_auth_token(user.id)
+        if user.org_id != org_id:
+            raise HTTPException(
+                status_code=403, detail="User does not belong to this organization"
+            )
+
+        token = encode_auth_token(user)
         return {"access_token": token, "token_type": "bearer"}
