@@ -24,6 +24,7 @@ def create_service_entry(service_data: ServiceCreate, user: Users) -> Services:
 
                 # Create log within same transaction
                 create_log_entry(
+                    db,
                     user,
                     LogCreate(
                         service_id=new_service.id,
@@ -32,7 +33,7 @@ def create_service_entry(service_data: ServiceCreate, user: Users) -> Services:
                     ),
                 )
 
-            # At this point, transaction is committed
+            # At this point, transaction is committed : if no error occurs
 
         publish_ws_event(
             {
@@ -53,76 +54,90 @@ def create_service_entry(service_data: ServiceCreate, user: Users) -> Services:
 
 
 def delete_service_entry(service_id: int, user: Users):
-    with db_session() as db:
-        service = (
-            db.query(Services)
-            .filter_by(id=service_id, org_id=user.org_id, is_deleted=False)
-            .first()
+    try:
+        with db_session() as db:
+            with db.begin():
+                service = (
+                    db.query(Services)
+                    .filter_by(id=service_id, org_id=user.org_id, is_deleted=False)
+                    .first()
+                )
+
+                if not service:
+                    return None
+
+                service.is_deleted = True
+                db.flush()
+
+                create_log_entry(
+                    db,
+                    user,
+                    LogCreate(
+                        service_id=service.id,
+                        status_code=service.status_code,
+                        details={"action": "delete"},
+                    ),
+                )
+
+        publish_ws_event(
+            {
+                "action": "delete",
+                "service": {
+                    "id": service.id,
+                    "status_code": service.status_code,
+                    "domain": service.domain,
+                },
+            }
         )
 
-        if service:
-            service.is_deleted = True
-            db.commit()
+        return service
 
-            create_log_entry(
-                user,
-                LogCreate(
-                    service_id=service.id,
-                    status_code=service.status_code,
-                    details={"action": "delete"},
-                ),
-            )
-
-            publish_ws_event(
-                {
-                    "action": "delete",
-                    "service": {
-                        "id": service.id,
-                        "status_code": service.status_code,
-                        "domain": service.domain,
-                    },
-                }
-            )
-
-            return service
-    return None
+    except SQLAlchemyError as e:
+        raise RuntimeError(f"Service deletion failed: {str(e)}") from e
 
 
 def update_service_status_entry(service_id: int, new_status_code: int, user: Users):
-    with db_session() as db:
-        service = (
-            db.query(Services)
-            .filter_by(id=service_id, org_id=user.org_id, is_deleted=False)
-            .first()
+    try:
+        with db_session() as db:
+            with db.begin():
+                service = (
+                    db.query(Services)
+                    .filter_by(id=service_id, org_id=user.org_id, is_deleted=False)
+                    .first()
+                )
+
+                if not service:
+                    return None
+
+                service.status_code = new_status_code
+                db.flush()
+
+                create_log_entry(
+                    db,
+                    user,
+                    LogCreate(
+                        service_id=service.id,
+                        status_code=new_status_code,
+                        details={"action": "update_status"},
+                    ),
+                )
+
+        publish_ws_event(
+            {
+                "action": "update",
+                "service": {
+                    "id": service.id,
+                    "name": service.service_name,
+                    "status_code": service.status_code,
+                    "domain": service.domain,
+                },
+            }
         )
 
-        if service:
-            service.status_code = new_status_code
-            db.commit()
+        return service
 
-            create_log_entry(
-                user,
-                LogCreate(
-                    service_id=service.id,
-                    status_code=new_status_code,
-                    details={"action": "update_status"},
-                ),
-            )
-
-            publish_ws_event(
-                {
-                    "action": "create",
-                    "service": {
-                        "id": service.id,
-                        "name": service.service_name,
-                        "status_code": service.status_code,
-                        "domain": service.domain,
-                    },
-                }
-            )
-
-            return service
-    return None
+    except SQLAlchemyError as e:
+        raise RuntimeError(f"Service update failed: {str(e)}") from e
 
 
 def get_services_by_org(org_id: int):
