@@ -3,7 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.models.services import Services
 from app.models.users import Users
 from app.schemas.logs_schema import LogCreate
-from app.schemas.service_schema import ServiceCreate
+from app.schemas.service_schema import ServiceCreate, ServiceOut
 from app.services.auth_service import db_session
 from app.services.logs_service import create_log_entry
 from app.utils.pubsub import publish_ws_event
@@ -33,6 +33,8 @@ def create_service_entry(service_data: ServiceCreate, user: Users) -> Services:
                     ),
                 )
 
+            service_out = ServiceOut.from_orm(new_service)
+
             # At this point, transaction is committed : if no error occurs
 
         publish_ws_event(
@@ -47,7 +49,7 @@ def create_service_entry(service_data: ServiceCreate, user: Users) -> Services:
             }
         )
 
-        return new_service
+        return service_out
 
     except SQLAlchemyError as e:
         raise RuntimeError(f"Service creation failed: {str(e)}") from e
@@ -79,6 +81,8 @@ def delete_service_entry(service_id: int, user: Users):
                     ),
                 )
 
+                service_out = ServiceOut.from_orm(service)
+
                 event_data = {
                     "id": service.id,
                     "status_code": service.status_code,
@@ -87,7 +91,7 @@ def delete_service_entry(service_id: int, user: Users):
 
         publish_ws_event({"action": "delete", "service": event_data})
 
-        return service
+        return service_out
 
     except SQLAlchemyError as e:
         raise RuntimeError(f"Service deletion failed: {str(e)}") from e
@@ -119,6 +123,8 @@ def update_service_status_entry(service_id: int, new_status_code: int, user: Use
                     ),
                 )
 
+                service_out = ServiceOut.from_orm(service)
+
                 event_data = {
                     "id": str(service.id),
                     "name": service.service_name,
@@ -128,7 +134,7 @@ def update_service_status_entry(service_id: int, new_status_code: int, user: Use
 
         publish_ws_event({"action": "update", "service": event_data})
 
-        return service
+        return service_out
 
     except SQLAlchemyError as e:
         raise RuntimeError(f"Service update failed: {str(e)}") from e
