@@ -1,5 +1,3 @@
-import asyncio
-
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.models.services import Services
@@ -8,7 +6,7 @@ from app.schemas.logs_schema import LogCreate
 from app.schemas.service_schema import ServiceCreate
 from app.services.auth_service import db_session
 from app.services.logs_service import create_log_entry
-from app.utils.websocket_manager import ws_manager
+from app.utils.pubsub import publish_ws_event
 
 
 def create_service_entry(service_data: ServiceCreate, user: Users) -> Services:
@@ -36,19 +34,16 @@ def create_service_entry(service_data: ServiceCreate, user: Users) -> Services:
 
             # At this point, transaction is committed
 
-        # Fire async broadcast AFTER successful DB transaction
-        asyncio.create_task(
-            ws_manager.broadcast(
-                {
-                    "action": "create",
-                    "service": {
-                        "id": new_service.id,
-                        "name": new_service.service_name,
-                        "status_code": new_service.status_code,
-                        "domain": new_service.domain,
-                    },
-                }
-            )
+        publish_ws_event(
+            {
+                "action": "create",
+                "service": {
+                    "id": new_service.id,
+                    "name": new_service.service_name,
+                    "status_code": new_service.status_code,
+                    "domain": new_service.domain,
+                },
+            }
         )
 
         return new_service
@@ -78,17 +73,15 @@ def delete_service_entry(service_id: int, user: Users):
                 ),
             )
 
-            asyncio.create_task(
-                ws_manager.broadcast(
-                    {
-                        "action": "delete",
-                        "service": {
-                            "id": service.id,
-                            "status_code": service.status_code,
-                            "domain": service.domain,
-                        },
-                    }
-                )
+            publish_ws_event(
+                {
+                    "action": "delete",
+                    "service": {
+                        "id": service.id,
+                        "status_code": service.status_code,
+                        "domain": service.domain,
+                    },
+                }
             )
 
             return service
@@ -116,18 +109,16 @@ def update_service_status_entry(service_id: int, new_status_code: int, user: Use
                 ),
             )
 
-            asyncio.create_task(
-                ws_manager.broadcast(
-                    {
-                        "action": "create",
-                        "service": {
-                            "id": service.id,
-                            "name": service.service_name,
-                            "status_code": service.status_code,
-                            "domain": service.domain,
-                        },
-                    }
-                )
+            publish_ws_event(
+                {
+                    "action": "create",
+                    "service": {
+                        "id": service.id,
+                        "name": service.service_name,
+                        "status_code": service.status_code,
+                        "domain": service.domain,
+                    },
+                }
             )
 
             return service
