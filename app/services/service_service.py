@@ -1,6 +1,6 @@
 import asyncio
 
-from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.models.services import Services
 from app.models.users import Users
@@ -11,45 +11,50 @@ from app.services.logs_service import create_log_entry
 from app.utils.websocket_manager import ws_manager
 
 
-def create_service_entry(
-    service_data: ServiceCreate, user: Users
-) -> Services:
-    new_service = Services(
-        service_name=service_data.service_name,
-        status_code=service_data.status_code,
-        domain=service_data.domain,
-        org_id=user.org_id,
-    )
-    with db_session() as db:
-        db.add(new_service)
-        db.commit()
-        db.refresh(new_service)
+def create_service_entry(service_data: ServiceCreate, user: Users) -> Services:
+    try:
+        with db_session() as db:
+            with db.begin():
+                new_service = Services(
+                    service_name=service_data.service_name,
+                    status_code=service_data.status_code,
+                    domain=service_data.domain,
+                    org_id=user.org_id,
+                )
+                db.add(new_service)
+                db.flush()  # get new_service.id without committing
 
-        create_log_entry(
-            db,
-            user,
-            LogCreate(
-                service_id=new_service.id,
-                status_code=service_data.status_code,
-                details={"action": "create", "domain": service_data.domain},
-            ),
+                # Create log within same transaction
+                create_log_entry(
+                    user,
+                    LogCreate(
+                        service_id=new_service.id,
+                        status_code=service_data.status_code,
+                        details={"action": "create", "domain": service_data.domain},
+                    ),
+                )
+
+            # At this point, transaction is committed
+
+        # Fire async broadcast AFTER successful DB transaction
+        asyncio.create_task(
+            ws_manager.broadcast(
+                {
+                    "action": "create",
+                    "service": {
+                        "id": new_service.id,
+                        "name": new_service.service_name,
+                        "status_code": new_service.status_code,
+                        "domain": new_service.domain,
+                    },
+                }
+            )
         )
 
-    asyncio.create_task(
-        ws_manager.broadcast(
-            {
-                "action": "create",
-                "service": {
-                    "id": new_service.id,
-                    "name": new_service.service_name,
-                    "status_code": new_service.status_code,
-                    "domain": new_service.domain,
-                },
-            }
-        )
-    )
+        return new_service
 
-    return new_service
+    except SQLAlchemyError as e:
+        raise RuntimeError(f"Service creation failed: {str(e)}") from e
 
 
 def delete_service_entry(service_id: int, user: Users):
@@ -65,7 +70,6 @@ def delete_service_entry(service_id: int, user: Users):
             db.commit()
 
             create_log_entry(
-                db,
                 user,
                 LogCreate(
                     service_id=service.id,
@@ -91,9 +95,7 @@ def delete_service_entry(service_id: int, user: Users):
     return None
 
 
-def update_service_status_entry(
-    service_id: int, new_status_code: int, user: Users
-):
+def update_service_status_entry(service_id: int, new_status_code: int, user: Users):
     with db_session() as db:
         service = (
             db.query(Services)
@@ -106,7 +108,6 @@ def update_service_status_entry(
             db.commit()
 
             create_log_entry(
-                db,
                 user,
                 LogCreate(
                     service_id=service.id,
