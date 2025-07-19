@@ -62,10 +62,9 @@ def add_update_to_incident(data: IncidentUpdateEntry):
     return update
 
 
-def get_incidents_by_org(user):
-    if not user.org_id:
+def get_incidents_by_org(org_id:int):
+    if not org_id:
         raise HTTPException(status_code=400, detail="Organization ID is required")
     with db_session() as db:
-        result = db.query(Incidents).filter_by(org_id=user.org_id).all()
-        print(result)
+        result = db.query(Incidents).filter_by(org_id=org_id).all()
         return result if result else {"message": "No incidents found for this organization."}

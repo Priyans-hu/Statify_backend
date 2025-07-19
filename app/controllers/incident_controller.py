@@ -35,11 +35,11 @@ def add_incident_update_controller(data: IncidentUpdateEntry, current_user):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def get_all_incidents_controller(current_user):
+def get_all_incidents_controller(org_id):
     try:
         return {
             "message": "Fetched all incidents successfully",
-            "data": incident_service.get_incidents_by_org(current_user),
+            "incidents": incident_service.get_incidents_by_org(org_id),
         }
     except Exception as e:
         raise HTTPException(

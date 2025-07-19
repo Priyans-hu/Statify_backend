@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 
 from app.controllers import incident_controller
 from app.models.users import Users
@@ -24,5 +24,6 @@ def add_incident_update(data: IncidentUpdateEntry, current_user: Users = Depends
 
 
 @router.get("/")
-def get_incidents(current_user: Users = Depends(get_current_user)):
-    return incident_controller.get_all_incidents_controller(current_user)
+def get_incidents(request: Request):
+    org_id = request.state.org_id
+    return incident_controller.get_all_incidents_controller(org_id)
