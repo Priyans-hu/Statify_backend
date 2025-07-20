@@ -13,7 +13,9 @@ class IncidentCreate(BaseModel):
 
 
 class IncidentUpdate(BaseModel):
+    incident_id: int
     status: str
+    description: Optional[str] = None
     resolved_at: Optional[datetime] = None
 
 
