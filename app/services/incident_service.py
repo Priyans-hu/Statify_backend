@@ -11,46 +11,60 @@ from app.schemas.incident_schema import (
     IncidentUpdateEntry,
 )
 from app.services.auth_service import db_session
+from app.utils.pubsub import publish_ws_event
 
 
 def create_incident(current_user, data: IncidentCreate):
     if not current_user.org_id:
         raise HTTPException(status_code=400, detail="Organization ID is required")
-    incident = Incidents(
-        title=data.title,
-        org_id=current_user.org_id,
-        status=data.status,
-        is_scheduled=data.is_scheduled,
-        started_at=data.started_at or datetime.now(),
-    )
+    try:
+        incident = Incidents(
+            title=data.title,
+            org_id=current_user.org_id,
+            status=data.status,
+            is_scheduled=data.is_scheduled,
+            started_at=data.started_at or datetime.now(),
+        )
+        with db_session() as db:
+            db.add(incident)
+            db.commit()
+            db.refresh(incident)
 
-    with db_session() as db:
-        db.add(incident)
-        db.commit()
-        db.refresh(incident)
+            for sid in data.service_ids:
+                assoc = IncidentServiceAssociation(incident_id=incident.id, service_id=sid)
+                db.add(assoc)
 
-        for sid in data.service_ids:
-            assoc = IncidentServiceAssociation(incident_id=incident.id, service_id=sid)
-            db.add(assoc)
+            db.commit()
 
-        db.commit()
+        publish_ws_event(
+            {
+                "type" : "incident",
+                "data" : {"action": "update", "incident": incident}
+            },
+            current_user.org_id
+        )
 
-    return incident
+        return incident
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create incident: {str(e)}")
 
 
 def update_incident_status(incident_id: int, data: IncidentUpdate):
-    with db_session() as db:
-        incident = db.query(Incidents).filter_by(id=incident_id).first()
+    try:
+        with db_session() as db:
+            incident = db.query(Incidents).filter_by(id=incident_id).first()
 
-        if not incident:
-            return None
-        incident.status = data.status
+            if not incident:
+                return None
+            incident.status = data.status
 
-        if data.resolved_at:
-            incident.resolved_at = data.resolved_at
+            if data.resolved_at:
+                incident.resolved_at = data.resolved_at
 
-        db.commit()
-    return incident
+            db.commit()
+        return incident
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update incident: {str(e)}")
 
 
 def add_update_to_incident(data: IncidentUpdateEntry):
