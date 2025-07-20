@@ -1,10 +1,7 @@
-from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
-
-from app.database import SessionLocal
-from app.models.organizations import Organizations
+from app.utils.org_id_fetch import resolve_org_slug
 
 
 class OrgSlugResolverMiddleware(BaseHTTPMiddleware):
@@ -12,13 +9,9 @@ class OrgSlugResolverMiddleware(BaseHTTPMiddleware):
         org_slug = request.query_params.get("org")
 
         if org_slug:
-            db: Session = SessionLocal()
-            try:
-                org = db.query(Organizations).filter_by(slug=org_slug).first()
-                if org:
-                    request.state.org_id = org.id
-            finally:
-                db.close()
+            org = await resolve_org_slug(org_slug)
+            if org:
+                request.state.org_id = org.id
 
         response: Response = await call_next(request)
         return response

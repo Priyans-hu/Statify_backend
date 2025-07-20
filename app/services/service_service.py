@@ -39,14 +39,19 @@ def create_service_entry(service_data: ServiceCreate, user: Users) -> Services:
 
         publish_ws_event(
             {
-                "action": "create",
-                "service": {
-                    "id": new_service.id,
-                    "name": new_service.service_name,
-                    "status_code": new_service.status_code,
-                    "domain": new_service.domain,
-                },
-            }
+            "type" : "service",
+            "data" :
+                {
+                    "action": "create",
+                    "service": {
+                        "id": new_service.id,
+                        "name": new_service.service_name,
+                        "status_code": new_service.status_code,
+                        "domain": new_service.domain,
+                    },
+                }
+            }, 
+            user.org_id
         )
 
         return service_out
@@ -89,7 +94,13 @@ def delete_service_entry(service_id: int, user: Users):
                     "domain": service.domain,
                 }
 
-        publish_ws_event({"action": "delete", "service": event_data})
+        publish_ws_event(
+            {
+                "type" : "service",
+                "data" : {"action": "delete", "service": event_data}
+            },
+            user.org_id
+        )
 
         return service_out
 
@@ -132,7 +143,13 @@ def update_service_status_entry(service_id: int, new_status_code: int, user: Use
                     "domain": service.domain,
                 }
 
-        publish_ws_event({"action": "update", "service": event_data})
+        publish_ws_event(
+            {
+                "type" : "service",
+                "data" : {"action": "update", "service": event_data}
+            },
+            user.org_id
+        )
 
         return service_out
 

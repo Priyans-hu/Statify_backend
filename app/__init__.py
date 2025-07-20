@@ -1,6 +1,8 @@
+import asyncio
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.event_loop import set_event_loop
 
 from app.middleware.org_slug_middleware import OrgSlugResolverMiddleware
 from app.routes import (
@@ -17,6 +19,7 @@ def create_app():
     # from app.routes import user  # import router
     load_dotenv()
     app = FastAPI()
+    set_event_loop(asyncio.get_running_loop())
     # Corss Middleware
     app.add_middleware(
         CORSMiddleware,
