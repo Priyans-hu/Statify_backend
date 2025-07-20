@@ -7,6 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models import Organizations
 from app.models.users import Users
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
@@ -20,6 +21,10 @@ def encode_auth_token(user: Users) -> str:
             "user_id": str(user.id),
             "role": str(user.role),
             "org_id": str(user.org_id),
+            "org_slug": get_db(Organizations)
+            .filter(Organizations.id == user.org_id)
+            .first()
+            .slug,
             "username": str(user.username),
             "exp": datetime.datetime.now() + datetime.timedelta(days=1),
         }
