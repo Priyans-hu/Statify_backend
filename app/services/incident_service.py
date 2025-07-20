@@ -121,12 +121,18 @@ def get_incidents_by_org(org_id: int):
     if not org_id:
         raise HTTPException(status_code=400, detail="Organization ID is required")
     with db_session() as db:
-        result = db.query(Incidents).filter_by(org_id=org_id).all()
-        return (
-            result
-            if result
-            else {"message": "No incidents found for this organization."}
-        )
+        incidents = db.query(Incidents).filter_by(org_id=org_id).all()
+
+        if not incidents:
+            return []
+
+        result = []
+        for incident in incidents:
+            incident_data = get_incident_by_id(incident.id)
+            if incident_data:
+                result.append(incident_data)
+
+        return result
 
 
 def get_active_incidents(org_id: int) -> list[IncidentOutFull]:
