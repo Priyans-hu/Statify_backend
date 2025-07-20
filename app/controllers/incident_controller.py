@@ -53,4 +53,13 @@ def get_all_incidents_controller(org_id):
 
 
 def get_active_incidents_controller(org_id: int) -> list[IncidentOutFull]:
-    return incident_service.get_active_incidents(org_id)
+    try:
+        return {
+            "message": "Fetched all incidents successfully",
+            "incidents": incident_service.get_active_incidents(org_id),
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"An error occurred while fetching incidents: {str(e)}",
+        )

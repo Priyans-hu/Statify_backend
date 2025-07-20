@@ -4,7 +4,6 @@ from app.controllers import incident_controller
 from app.models.users import Users
 from app.schemas.incident_schema import (
     IncidentCreate,
-    IncidentOutFull,
     IncidentUpdate,
     IncidentUpdateEntry,
 )
@@ -44,7 +43,7 @@ def get_incidents(request: Request):
     return incident_controller.get_all_incidents_controller(org_id)
 
 
-@router.get("/active", response_model=list[IncidentOutFull])
+@router.get("/active")
 def get_active_incidents(request: Request):
     org_id = request.state.org_id
     return incident_controller.get_active_incidents_controller(org_id)

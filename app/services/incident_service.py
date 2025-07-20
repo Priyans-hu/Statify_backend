@@ -101,11 +101,12 @@ def get_active_incidents(org_id: int) -> list[IncidentOutFull]:
 def get_incident_by_id(incident_id: int):
     with db_session() as db:
         incident = db.query(Incidents).filter_by(id=incident_id).first()
+
         if not incident:
             return None
 
         affected_services = (
-            db.query(Services.id, Services.service_name)
+            db.query(Services)
             .join(
                 IncidentServiceAssociation,
                 Services.id == IncidentServiceAssociation.service_id,
@@ -135,7 +136,7 @@ def get_incident_by_id(incident_id: int):
             "services": [
                 {
                     "id": s.id,
-                    "service_name": s.name,
+                    "service_name": s.service_name,
                     "org_id": s.org_id,
                     "status_code": s.status_code,
                     "domain": s.domain,
