@@ -23,7 +23,7 @@ def update_incident_controller(incident_id: int, data: IncidentUpdate, current_u
     try:
         return {
             "message": "Updated Incident successfully",
-            "data": incident_service.update_incident_status(incident_id, data),
+            "data": incident_service.update_incident_status(incident_id, data, current_user),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -33,7 +33,7 @@ def add_incident_update_controller(data: IncidentUpdateEntry, current_user):
     try:
         return {
             "message": "Added incident update successfully",
-            "data": incident_service.add_update_to_incident(data),
+            "data": incident_service.add_update_to_incident(data, current_user),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

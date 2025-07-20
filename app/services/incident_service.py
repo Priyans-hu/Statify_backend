@@ -39,7 +39,7 @@ def create_incident(current_user, data: IncidentCreate):
         publish_ws_event(
             {
                 "type" : "incident",
-                "data" : {"action": "update", "incident": incident}
+                "data" : {"action": "create", "incident": incident}
             },
             current_user.org_id
         )
@@ -49,7 +49,9 @@ def create_incident(current_user, data: IncidentCreate):
         raise HTTPException(status_code=500, detail=f"Failed to create incident: {str(e)}")
 
 
-def update_incident_status(incident_id: int, data: IncidentUpdate):
+def update_incident_status(incident_id: int, data: IncidentUpdate, user):
+    if not user.org_id:
+        raise HTTPException(status_code=400, detail="Organization ID is required")
     try:
         with db_session() as db:
             incident = db.query(Incidents).filter_by(id=incident_id).first()
@@ -69,12 +71,23 @@ def update_incident_status(incident_id: int, data: IncidentUpdate):
                 incident.resolved_at = data.resolved_at
 
             db.commit()
+        
+        publish_ws_event(
+            {
+                "type" : "incident",
+                "data" : {"action": "update", "incident": data.model_dump()}
+            },
+            user.org_id
+        )
+
         return incident
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to update incident: {str(e)}")
 
 
-def add_update_to_incident(data: IncidentUpdateEntry):
+def add_update_to_incident(data: IncidentUpdateEntry, user):
+    if not user.org_id:
+        raise HTTPException(status_code=400, detail="Organization ID is required")
     print(data.incident_id, data.description)
     with db_session() as db:
         update = IncidentUpdates(
@@ -85,6 +98,15 @@ def add_update_to_incident(data: IncidentUpdateEntry):
         db.add(update)
 
         db.commit()
+
+    publish_ws_event(
+        {
+            "type" : "incident",
+            "data" : {"action": "add_update", "incident": data.model_dump()}
+        },
+        user.org_id
+    )
+
     return update
 
 
