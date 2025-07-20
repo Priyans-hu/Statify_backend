@@ -58,6 +58,13 @@ def update_incident_status(incident_id: int, data: IncidentUpdate):
                 return None
             incident.status = data.status
 
+            add_update_to_incident(
+                IncidentUpdateEntry(
+                    **{"incident_id": incident_id, "description": data.description}
+                )
+            )
+
+            print("added update to incident")
             if data.resolved_at:
                 incident.resolved_at = data.resolved_at
 
@@ -68,11 +75,12 @@ def update_incident_status(incident_id: int, data: IncidentUpdate):
 
 
 def add_update_to_incident(data: IncidentUpdateEntry):
+    print(data.incident_id, data.description)
     with db_session() as db:
         update = IncidentUpdates(
             incident_id=data.incident_id,
             description=data.description,
-            timestamp=datetime.now(),
+            created_at=datetime.now(),
         )
         db.add(update)
 
@@ -160,7 +168,7 @@ def get_incident_by_id(incident_id: int):
             "updates": [
                 {
                     "id": update.id,
-                    "description": update.message,  # 'message' maps to 'description'
+                    "description": update.description,  # 'message' maps to 'description'
                     "timestamp": update.created_at,  # 'created_at' maps to 'timestamp'
                 }
                 for update in incident_updates
