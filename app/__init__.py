@@ -1,14 +1,16 @@
 import asyncio
+
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.event_loop import set_event_loop
 
+from app.core.event_loop import set_event_loop
 from app.middleware.org_slug_middleware import OrgSlugResolverMiddleware
 from app.routes import (
     auth_routes,
     incident_routes,
     logs_route,
+    organization_router,
     service_routes,
     status_routes,
     ws_routes,
@@ -37,5 +39,6 @@ def create_app():
     app.include_router(ws_routes.router)
     app.include_router(incident_routes.router)
     app.include_router(status_routes.router)
+    app.include_router(organization_router.router)
 
     return app

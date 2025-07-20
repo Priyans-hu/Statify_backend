@@ -31,22 +31,23 @@ def create_incident(current_user, data: IncidentCreate):
             db.refresh(incident)
 
             for sid in data.service_ids:
-                assoc = IncidentServiceAssociation(incident_id=incident.id, service_id=sid)
+                assoc = IncidentServiceAssociation(
+                    incident_id=incident.id, service_id=sid
+                )
                 db.add(assoc)
 
             db.commit()
 
         publish_ws_event(
-            {
-                "type" : "incident",
-                "data" : {"action": "create", "incident": incident}
-            },
-            current_user.org_id
+            {"type": "incident", "data": {"action": "create", "incident": incident}},
+            current_user.org_id,
         )
 
         return incident
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create incident: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to create incident: {str(e)}"
+        )
 
 
 def update_incident_status(incident_id: int, data: IncidentUpdate, user):
@@ -64,7 +65,8 @@ def update_incident_status(incident_id: int, data: IncidentUpdate, user):
             add_update_to_incident(
                 IncidentUpdateEntry(
                     **{"incident_id": incident_id, "description": data.description}
-                )
+                ),
+                user,
             )
 
             print("added update to incident")
@@ -75,15 +77,17 @@ def update_incident_status(incident_id: int, data: IncidentUpdate, user):
 
         publish_ws_event(
             {
-                "type" : "incident",
-                "data" : {"action": "update", "incident": data.model_dump()}
+                "type": "incident",
+                "data": {"action": "update", "incident": data.model_dump()},
             },
-            user.org_id
+            user.org_id,
         )
 
         return incident
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to update incident: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to update incident: {str(e)}"
+        )
 
 
 def add_update_to_incident(data: IncidentUpdateEntry, user):
@@ -102,10 +106,10 @@ def add_update_to_incident(data: IncidentUpdateEntry, user):
 
     publish_ws_event(
         {
-            "type" : "incident",
-            "data" : {"action": "add_update", "incident": data.model_dump()}
+            "type": "incident",
+            "data": {"action": "add_update", "incident": data.model_dump()},
         },
-        user.org_id
+        user.org_id,
     )
 
     return update
