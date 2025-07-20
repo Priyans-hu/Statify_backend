@@ -17,11 +17,12 @@ security = HTTPBearer()
 
 def encode_auth_token(user: Users) -> str:
     try:
+        db = next(get_db())
         payload = {
             "user_id": str(user.id),
             "role": str(user.role),
             "org_id": str(user.org_id),
-            "org_slug": get_db(Organizations)
+            "org_slug": db.query(Organizations)
             .filter(Organizations.id == user.org_id)
             .first()
             .slug,
