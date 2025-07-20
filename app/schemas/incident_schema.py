@@ -13,7 +13,9 @@ class IncidentCreate(BaseModel):
 
 
 class IncidentUpdate(BaseModel):
+    incident_id: int
     status: str
+    description: Optional[str] = None
     resolved_at: Optional[datetime] = None
 
 
@@ -33,3 +35,39 @@ class IncidentOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ServiceOut(BaseModel):
+    id: int
+    service_name: str
+    domain: str
+
+    class Config:
+        orm_mode = True
+
+
+class IncidentUpdateOut(BaseModel):
+    id: int
+    description: str
+    timestamp: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class IncidentOutFull(BaseModel):
+    id: int
+    title: str
+    description: Optional[str]
+    org_id: int
+    status: str
+    is_scheduled: bool
+    started_at: datetime
+    resolved_at: Optional[datetime]
+    created_at: datetime
+    updated_at: datetime
+    services: list[ServiceOut]
+    updates: list[IncidentUpdateOut]
+
+    class Config:
+        orm_mode = True

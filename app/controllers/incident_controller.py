@@ -1,7 +1,11 @@
 # app/controllers/incident_controller.py
 from fastapi import HTTPException
 
-from app.schemas.incident_schema import IncidentUpdate, IncidentUpdateEntry
+from app.schemas.incident_schema import (
+    IncidentOutFull,
+    IncidentUpdate,
+    IncidentUpdateEntry,
+)
 from app.services import incident_service
 
 
@@ -19,7 +23,7 @@ def update_incident_controller(incident_id: int, data: IncidentUpdate, current_u
     try:
         return {
             "message": "Updated Incident successfully",
-            "data": incident_service.update_incident_status(incident_id, data),
+            "data": incident_service.update_incident_status(incident_id, data, current_user),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -29,17 +33,30 @@ def add_incident_update_controller(data: IncidentUpdateEntry, current_user):
     try:
         return {
             "message": "Added incident update successfully",
-            "data": incident_service.add_update_to_incident(data),
+            "data": incident_service.add_update_to_incident(data, current_user),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def get_all_incidents_controller(current_user):
+def get_all_incidents_controller(org_id):
     try:
         return {
             "message": "Fetched all incidents successfully",
-            "data": incident_service.get_incidents_by_org(current_user),
+            "incidents": incident_service.get_incidents_by_org(org_id),
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"An error occurred while fetching incidents: {str(e)}",
+        )
+
+
+def get_active_incidents_controller(org_id: int) -> list[IncidentOutFull]:
+    try:
+        return {
+            "message": "Fetched all incidents successfully",
+            "incidents": incident_service.get_active_incidents(org_id),
         }
     except Exception as e:
         raise HTTPException(
