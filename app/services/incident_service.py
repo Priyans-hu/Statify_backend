@@ -59,21 +59,23 @@ def update_incident_status(incident_id: int, data: IncidentUpdate, user):
 
             if not incident:
                 return None
+
             incident.status = data.status
 
-        if data.description is not None:
-            add_update_to_incident(
-                IncidentUpdateEntry(
-                    **{"incident_id": incident_id, "description": data.description}
-                ),
-                user,
-            )
+            if data.description is not None:
+                add_update_to_incident(
+                    IncidentUpdateEntry(
+                        **{"incident_id": incident_id, "description": data.description}
+                    ),
+                    user,
+                )
 
-            print("added update to incident")
             if data.resolved_at:
                 incident.resolved_at = data.resolved_at
 
             db.commit()
+
+            db.refresh(incident)
 
         publish_ws_event(
             {
@@ -84,6 +86,7 @@ def update_incident_status(incident_id: int, data: IncidentUpdate, user):
         )
 
         return incident
+
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to update incident: {str(e)}"
@@ -93,7 +96,6 @@ def update_incident_status(incident_id: int, data: IncidentUpdate, user):
 def add_update_to_incident(data: IncidentUpdateEntry, user):
     if not user.org_id:
         raise HTTPException(status_code=400, detail="Organization ID is required")
-    print(data.incident_id, data.description)
     with db_session() as db:
         update = IncidentUpdates(
             incident_id=data.incident_id,
