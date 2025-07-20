@@ -60,6 +60,7 @@ def update_incident_status(incident_id: int, data: IncidentUpdate, user):
                 return None
             incident.status = data.status
 
+        if data.description is not None:
             add_update_to_incident(
                 IncidentUpdateEntry(
                     **{"incident_id": incident_id, "description": data.description}
@@ -71,7 +72,7 @@ def update_incident_status(incident_id: int, data: IncidentUpdate, user):
                 incident.resolved_at = data.resolved_at
 
             db.commit()
-        
+
         publish_ws_event(
             {
                 "type" : "incident",
