@@ -45,7 +45,8 @@ def create_service_entry(service_data: ServiceCreate, user: Users) -> Services:
                     "action": "create",
                     "service": {
                         "id": new_service.id,
-                        "name": new_service.service_name,
+                        "org_id": user.org_id,
+                        "service_name": new_service.service_name,
                         "status_code": new_service.status_code,
                         "domain": new_service.domain,
                     },
@@ -138,9 +139,10 @@ def update_service_status_entry(service_id: int, new_status_code: int, user: Use
 
                 event_data = {
                     "id": str(service.id),
-                    "name": service.service_name,
+                    "service_name": service.service_name,
                     "status_code": service.status_code,
                     "domain": service.domain,
+                    "org_id": user.org_id,
                 }
 
         publish_ws_event(
