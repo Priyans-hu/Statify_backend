@@ -43,7 +43,7 @@ class ServiceOut(BaseModel):
     domain: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class IncidentUpdateOut(BaseModel):
@@ -52,7 +52,7 @@ class IncidentUpdateOut(BaseModel):
     timestamp: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class IncidentOutFull(BaseModel):
@@ -70,4 +70,4 @@ class IncidentOutFull(BaseModel):
     updates: list[IncidentUpdateOut]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
