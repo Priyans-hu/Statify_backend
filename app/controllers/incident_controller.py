@@ -1,7 +1,11 @@
 # app/controllers/incident_controller.py
 from fastapi import HTTPException
 
-from app.schemas.incident_schema import IncidentUpdate, IncidentUpdateEntry
+from app.schemas.incident_schema import (
+    IncidentOutFull,
+    IncidentUpdate,
+    IncidentUpdateEntry,
+)
 from app.services import incident_service
 
 
@@ -46,3 +50,7 @@ def get_all_incidents_controller(org_id):
             status_code=500,
             detail=f"An error occurred while fetching incidents: {str(e)}",
         )
+
+
+def get_active_incidents_controller(org_id: int) -> list[IncidentOutFull]:
+    return incident_service.get_active_incidents(org_id)
