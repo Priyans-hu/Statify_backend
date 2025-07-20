@@ -48,6 +48,12 @@ cp .env.example .env
 docker-compose up --build
 ```
 
+### Frontend
+
+Checkout: [GitHub Repository](https://github.com/Priyans-hu/Statify_frontend)
+
+Build with next.js (tailwindcss, shadcdn, typescript)
+
 ## 📜 API Reference
 
 Auto-generated at: `http://localhost:8000/docs`
