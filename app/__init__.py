@@ -10,6 +10,7 @@ from app.routes import (
     auth_routes,
     incident_routes,
     logs_route,
+    metrics_router,
     organization_router,
     service_routes,
     status_routes,
@@ -40,5 +41,6 @@ def create_app():
     app.include_router(incident_routes.router)
     app.include_router(status_routes.router)
     app.include_router(organization_router.router)
+    app.include_router(metrics_router.router)
 
     return app
