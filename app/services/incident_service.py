@@ -12,6 +12,7 @@ from app.schemas.incident_schema import (
 )
 from app.services.auth_service import db_session
 from app.utils.pubsub import publish_ws_event
+from app.utils.serialize_datetimes import serialize_datetime
 
 
 def create_incident(current_user, data: IncidentCreate):
@@ -21,6 +22,7 @@ def create_incident(current_user, data: IncidentCreate):
         incident = Incidents(
             title=data.title,
             org_id=current_user.org_id,
+            description=data.description,
             status=data.status,
             is_scheduled=data.is_scheduled,
             started_at=data.started_at or datetime.now(),
@@ -38,12 +40,18 @@ def create_incident(current_user, data: IncidentCreate):
 
             db.commit()
 
+            incident_out = get_incident_by_id(incident.id)
+            incident_out = serialize_datetime(incident_out)
+
         publish_ws_event(
-            {"type": "incident", "data": {"action": "create", "incident": incident}},
+            {
+                "type": "incident",
+                "data": {"action": "create", "incident": incident_out},
+            },
             current_user.org_id,
         )
 
-        return incident
+        return incident_out
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to create incident: {str(e)}"
@@ -77,10 +85,13 @@ def update_incident_status(incident_id: int, data: IncidentUpdate, user):
 
             db.refresh(incident)
 
+        incident_out = get_incident_by_id(incident_id)
+        incident_out = serialize_datetime(incident_out)
+
         publish_ws_event(
             {
                 "type": "incident",
-                "data": {"action": "update", "incident": data.model_dump()},
+                "data": {"action": "update", "incident": incident_out},
             },
             user.org_id,
         )
@@ -106,10 +117,13 @@ def add_update_to_incident(data: IncidentUpdateEntry, user):
 
         db.commit()
 
+    incident_out = get_incident_by_id(data.incident_id)
+    incident_out = serialize_datetime(incident_out)
+
     publish_ws_event(
         {
             "type": "incident",
-            "data": {"action": "add_update", "incident": data.model_dump()},
+            "data": {"action": "add_update", "incident": incident_out},
         },
         user.org_id,
     )
@@ -129,6 +143,7 @@ def get_incidents_by_org(org_id: int):
         result = []
         for incident in incidents:
             incident_data = get_incident_by_id(incident.id)
+            incident_data = serialize_datetime(incident_data)
             if incident_data:
                 result.append(incident_data)
 
@@ -149,6 +164,7 @@ def get_active_incidents(org_id: int) -> list[IncidentOutFull]:
         result = []
         for incident in active_incidents:
             incident_data = get_incident_by_id(incident.id)
+            incident_data = serialize_datetime(incident_data)
             if incident_data:
                 result.append(incident_data)
 
