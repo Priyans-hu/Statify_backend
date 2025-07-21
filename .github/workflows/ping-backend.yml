@@ -1,0 +1,13 @@
+name: Ping Render Backend
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # every 15 minutes
+  workflow_dispatch: # allows manual trigger from GitHub UI
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Curl your Render backend
+        run: curl -s -o /dev/null -w "%{http_code}" https://statify-backend-vxf6.onrender.com/status
