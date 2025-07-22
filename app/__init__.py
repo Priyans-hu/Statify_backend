@@ -1,5 +1,6 @@
 import asyncio
 import os
+from contextlib import asynccontextmanager
 
 import redis.asyncio as redis
 from dotenv import load_dotenv
@@ -24,7 +25,24 @@ from app.routes import (
 
 def create_app():
     load_dotenv()
-    app = FastAPI()
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        # Redis cache setup
+        redis_host = os.getenv("REDIS_HOST", "redis")
+        redis_port = int(os.getenv("REDIS_PORT", 6379))
+
+        redis_client = redis.Redis(
+            host=redis_host,
+            port=redis_port,
+            decode_responses=False,
+        )
+
+        FastAPICache.init(RedisBackend(redis_client), prefix="statify-cache")
+        yield
+        await redis_client.close()
+
+    app = FastAPI(lifespan=lifespan)
     set_event_loop(asyncio.get_running_loop())
 
     # CORS Middleware
@@ -48,17 +66,5 @@ def create_app():
     app.include_router(status_routes.router)
     app.include_router(organization_router.router)
     app.include_router(metrics_router.router)
-
-    # Redis cache setup
-    @app.on_event("startup")
-    async def on_startup():
-        redis_host = os.getenv("REDIS_HOST", "redis")
-        redis_port = int(os.getenv("REDIS_PORT", 6379))
-
-        redis_client = redis.Redis(
-            host=redis_host, port=redis_port, decode_responses=True
-        )
-
-        FastAPICache.init(RedisBackend(redis_client), prefix="statify-cache")
 
     return app
