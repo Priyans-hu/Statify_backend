@@ -2,8 +2,8 @@ name: Ping Render Backend
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # every 15 minutes
-  workflow_dispatch: # allows manual trigger from GitHub UI
+    - cron: '*/14 2-16 * * *' # Every 14 mins, 2 AM to 4 PM UTC (approx)
+  workflow_dispatch: # manual trigger
 
 jobs:
   ping:
