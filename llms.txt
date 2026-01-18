@@ -1,0 +1,47 @@
+# Statify Backend
+
+> Real-time status page system backend built with FastAPI
+
+## What is this?
+Statify backend is a multi-tenant status page API that allows organizations to:
+- Monitor and track service health status
+- Log and manage incidents
+- Provide real-time updates via WebSocket
+- Manage users with role-based access control
+
+## Tech Stack
+- FastAPI (Python 3.10+)
+- PostgreSQL with SQLAlchemy ORM
+- Alembic for migrations
+- JWT authentication
+- WebSocket for real-time updates
+- Docker deployment
+
+## Architecture
+Routes-Controller-Service pattern:
+- Routes: API endpoint definitions
+- Controllers: Business logic orchestration
+- Services: Database operations and business rules
+- Models: SQLAlchemy ORM definitions
+- Schemas: Pydantic validation
+
+## Key Features
+- Multi-tenant organization support
+- Real-time status updates via WebSocket
+- Incident management with status tracking
+- Service health monitoring
+- RBAC (Role-Based Access Control)
+
+## API Documentation
+When running, access:
+- Swagger UI: /docs
+- ReDoc: /redoc
+
+## Repository
+https://github.com/Priyans-hu/Statify_backend
+
+## Related
+- Frontend: https://github.com/Priyans-hu/Statify_frontend
+
+## License
+MIT
