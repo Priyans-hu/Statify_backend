@@ -39,11 +39,16 @@ def add_incident_update_controller(data: IncidentUpdateEntry, current_user):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def get_all_incidents_controller(org_id):
+def get_all_incidents_controller(org_id, page: int = 1, page_size: int = 20):
     try:
+        result = incident_service.get_incidents_by_org(org_id, page, page_size)
         return {
             "message": "Fetched all incidents successfully",
-            "incidents": incident_service.get_incidents_by_org(org_id),
+            "incidents": result["items"],
+            "total": result["total"],
+            "page": result["page"],
+            "page_size": result["page_size"],
+            "total_pages": result["total_pages"],
         }
     except Exception as e:
         raise HTTPException(
@@ -52,11 +57,16 @@ def get_all_incidents_controller(org_id):
         )
 
 
-def get_active_incidents_controller(org_id: int) -> list[IncidentOutFull]:
+def get_active_incidents_controller(org_id: int, page: int = 1, page_size: int = 20):
     try:
+        result = incident_service.get_active_incidents(org_id, page, page_size)
         return {
             "message": "Fetched all incidents successfully",
-            "incidents": incident_service.get_active_incidents(org_id),
+            "incidents": result["items"],
+            "total": result["total"],
+            "page": result["page"],
+            "page_size": result["page_size"],
+            "total_pages": result["total_pages"],
         }
     except Exception as e:
         raise HTTPException(

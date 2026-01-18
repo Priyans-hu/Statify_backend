@@ -159,6 +159,16 @@ def update_service_status_entry(service_id: int, new_status_code: int, user: Use
         raise RuntimeError(f"Service update failed: {str(e)}") from e
 
 
-def get_services_by_org(org_id: int):
+def get_services_by_org(org_id: int, page: int = 1, page_size: int = 20):
     with db_session() as db:
-        return db.query(Services).filter_by(org_id=org_id, is_deleted=False).all()
+        query = db.query(Services).filter_by(org_id=org_id, is_deleted=False)
+        total = query.count()
+        offset = (page - 1) * page_size
+        items = query.offset(offset).limit(page_size).all()
+        return {
+            "items": items,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size
+        }

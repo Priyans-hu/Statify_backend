@@ -44,5 +44,5 @@ def update_service_status_controller(
     return ServiceOut.from_orm(updated)
 
 
-def get_services_controller(org_id):
-    return service_service.get_services_by_org(org_id)
+def get_services_controller(org_id, page: int = 1, page_size: int = 20):
+    return service_service.get_services_by_org(org_id, page, page_size)

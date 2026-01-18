@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Query
 
 from app.controllers import service_controller
 from app.models.users import Users
@@ -35,7 +35,11 @@ def update_service_status(
     )
 
 
-@router.get("/", response_model=list[ServiceOut])
-def get_services(request: Request):
+@router.get("/")
+def get_services(
+    request: Request,
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(20, ge=1, le=100, description="Items per page")
+):
     org_id = request.state.org_id
-    return service_controller.get_services_controller(org_id)
+    return service_controller.get_services_controller(org_id, page, page_size)

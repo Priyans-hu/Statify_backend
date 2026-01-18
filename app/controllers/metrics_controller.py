@@ -24,7 +24,7 @@ def get_overall_uptime_metric_controller(org_id: int):
         )
 
 
-def get_complete_mtreric_controller(org_id: int):
+def get_complete_metric_controller(org_id: int):
     try:
         return {
             "overall_uptime_90d": compute_overall_uptime(org_id),
