@@ -131,14 +131,23 @@ def add_update_to_incident(data: IncidentUpdateEntry, user):
     return update
 
 
-def get_incidents_by_org(org_id: int):
+def get_incidents_by_org(org_id: int, page: int = 1, page_size: int = 20):
     if not org_id:
         raise HTTPException(status_code=400, detail="Organization ID is required")
     with db_session() as db:
-        incidents = db.query(Incidents).filter_by(org_id=org_id).all()
+        query = db.query(Incidents).filter_by(org_id=org_id)
+        total = query.count()
+        offset = (page - 1) * page_size
+        incidents = query.offset(offset).limit(page_size).all()
 
         if not incidents:
-            return []
+            return {
+                "items": [],
+                "total": 0,
+                "page": page,
+                "page_size": page_size,
+                "total_pages": 0
+            }
 
         result = []
         for incident in incidents:
@@ -147,19 +156,33 @@ def get_incidents_by_org(org_id: int):
             if incident_data:
                 result.append(incident_data)
 
-        return result
+        return {
+            "items": result,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size
+        }
 
 
-def get_active_incidents(org_id: int) -> list[IncidentOutFull]:
+def get_active_incidents(org_id: int, page: int = 1, page_size: int = 20):
     with db_session() as db:
-        active_incidents = (
+        query = (
             db.query(Incidents)
             .filter(Incidents.org_id == org_id, Incidents.resolved_at.is_(None))
-            .all()
         )
+        total = query.count()
+        offset = (page - 1) * page_size
+        active_incidents = query.offset(offset).limit(page_size).all()
 
         if not active_incidents:
-            return []
+            return {
+                "items": [],
+                "total": 0,
+                "page": page,
+                "page_size": page_size,
+                "total_pages": 0
+            }
 
         result = []
         for incident in active_incidents:
@@ -168,7 +191,13 @@ def get_active_incidents(org_id: int) -> list[IncidentOutFull]:
             if incident_data:
                 result.append(incident_data)
 
-        return result
+        return {
+            "items": result,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total + page_size - 1) // page_size
+        }
 
 
 def get_incident_by_id(incident_id: int):

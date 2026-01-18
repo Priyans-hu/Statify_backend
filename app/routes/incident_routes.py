@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Query
 
 from app.controllers import incident_controller
 from app.models.users import Users
@@ -38,12 +38,20 @@ def add_incident_update(
 
 
 @router.get("/")
-def get_incidents(request: Request):
+def get_incidents(
+    request: Request,
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(20, ge=1, le=100, description="Items per page")
+):
     org_id = request.state.org_id
-    return incident_controller.get_all_incidents_controller(org_id)
+    return incident_controller.get_all_incidents_controller(org_id, page, page_size)
 
 
 @router.get("/active")
-def get_active_incidents(request: Request):
+def get_active_incidents(
+    request: Request,
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(20, ge=1, le=100, description="Items per page")
+):
     org_id = request.state.org_id
-    return incident_controller.get_active_incidents_controller(org_id)
+    return incident_controller.get_active_incidents_controller(org_id, page, page_size)
