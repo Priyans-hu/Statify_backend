@@ -11,7 +11,6 @@ def publish_ws_event(event: dict, org_id: int = None):
         if loop is None:
             raise RuntimeError("Event loop not initialized")
         if org_id is not None:
-            print(org_id)
             asyncio.run_coroutine_threadsafe(_safe_broadcast(event, org_id), loop)
     except Exception as e:
         logger.warning(f"Failed to schedule WebSocket broadcast: {e}")
