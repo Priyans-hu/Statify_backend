@@ -25,10 +25,15 @@ class ConnectionManager:
     async def broadcast(self, message: dict, org_id: int):
         if org_id is not None:
             connections = self.active_connections.get(org_id, [])
+            dead_connections = []
             for connection in connections:
                 try:
                     await connection.send_json(message)
                 except Exception:
-                    pass
+                    dead_connections.append(connection)
+            # Clean up dead connections
+            for dead in dead_connections:
+                if dead in connections:
+                    connections.remove(dead)
 
 ws_manager = ConnectionManager()

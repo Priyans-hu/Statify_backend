@@ -7,6 +7,7 @@ from app.controllers.auth_controller import (
     register_user,
 )
 from app.models.users import Users
+from app.schemas.auth_schema import RegisterRequest, LoginRequest
 from app.utils.auth_util import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -14,22 +15,19 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @router.post("/register")
 def register(
-    data: dict,
+    data: RegisterRequest,
     request: Request,
 ):
-    org_id = request.state.org_id
-    return register_user(
-        data,
-    )
+    return register_user(data.model_dump())
 
 
 @router.post("/login")
 def login(
-    data: dict,
+    data: LoginRequest,
     request: Request,
 ):
     org_id = request.state.org_id
-    return login_user(data, org_id)
+    return login_user(data.model_dump(), org_id)
 
 
 @router.post("/logout")

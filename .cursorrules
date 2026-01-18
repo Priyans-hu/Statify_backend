@@ -1,0 +1,49 @@
+# Statify Backend - Cursor IDE Rules
+
+## Project Context
+This is a FastAPI backend for a multi-tenant status page system.
+
+## Code Style
+- Python 3.10+ with type hints
+- Use Pydantic v2 for validation (`model_dump()` not `dict()`)
+- Follow PEP 8 style guidelines
+- Use async/await for async operations
+
+## Architecture
+Follow Routes -> Controllers -> Services -> Models pattern:
+- Routes define endpoints and schemas
+- Controllers handle HTTP logic and exceptions
+- Services contain business logic and DB operations
+- Models are SQLAlchemy ORM definitions
+
+## File Organization
+- New models go in `app/models/`
+- New schemas go in `app/schemas/`
+- New services go in `app/services/`
+- New controllers go in `app/controllers/`
+- New routes go in `app/routes/`
+
+## Best Practices
+- Always validate input with Pydantic schemas
+- Use dependency injection for auth (`Depends(get_current_user)`)
+- Filter all queries by org_id for multi-tenant isolation
+- Handle exceptions in controllers, not services
+- Use logging instead of print statements
+
+## Database
+- PostgreSQL with SQLAlchemy ORM
+- UUID primary keys for all models
+- Alembic for migrations
+
+## Testing
+- pytest for unit tests
+- Use fixtures for test data
+- Mock external dependencies
+
+## Common Imports
+```python
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.utils.auth_util import get_current_user
+```

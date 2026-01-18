@@ -40,7 +40,7 @@ def logout_user(user):
 
 def current_user_controller(current_user):
     try:
-        return {"Logged In User": {current_user}}
+        return {"user": current_user}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
