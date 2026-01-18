@@ -165,10 +165,6 @@ def get_services_by_org(org_id: int, page: int = 1, page_size: int = 20):
         total = query.count()
         offset = (page - 1) * page_size
         items = query.offset(offset).limit(page_size).all()
-        return {
-            "items": items,
-            "total": total,
-            "page": page,
-            "page_size": page_size,
-            "total_pages": (total + page_size - 1) // page_size
-        }
+        # Return list directly for backward compatibility
+        # Frontend can use pagination params when ready
+        return [ServiceOut.from_orm(s) for s in items]
